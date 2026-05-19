@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dandy Dental Lab — BDR Tracker</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --bg-card: #ffffff;
+    --bg-col: #f0efe9;
+    --bg-input: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --text-faint: #999;
+    --border: rgba(0,0,0,0.1);
+    --border-med: rgba(0,0,0,0.18);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "SF Mono","Fira Code","Cascadia Code",monospace;
+    --green:#639922; --green-bg:#EAF3DE; --green-text:#3B6D11; --green-border:#97C459;
+    --yellow:#BA7517; --yellow-bg:#FAEEDA; --yellow-text:#854F0B; --yellow-border:#FAC775;
+    --orange:#D85A30; --orange-bg:#FAECE7; --orange-text:#993C1D; --orange-border:#F09975;
+    --red:#E24B4A; --red-bg:#FCEBEB; --red-text:#A32D2D; --red-border:#F09595;
+    --blue:#185FA5; --blue-bg:#E6F1FB; --blue-text:#0C447C;
+    --success-bg:#EAF3DE; --success-text:#3B6D11;
+    --warn-bg:#FAEEDA; --warn-text:#854F0B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+  /* Layout */
+  .app{max-width:1280px;margin:0 auto;padding:1.25rem 1.5rem;}
+
+  /* Topbar */
+  .topbar{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem;gap:12px;}
+  .topbar h1{font-size:15px;font-weight:600;color:var(--text);}
+  .topbar p{font-size:11px;color:var(--text-muted);margin-top:2px;}
+  .topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .sync-st{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;white-space:nowrap;}
+  .tbtn{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--radius);border:0.5px solid var(--border-med);background:var(--bg-card);color:var(--text);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--font);white-space:nowrap;transition:background .12s;}
+  .tbtn:hover{background:var(--bg-col);}
+  .tbtn.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+  .tbtn.primary:hover{background:#333;}
+
+  /* Tabs */
+  .tabs{display:flex;gap:2px;background:var(--bg-col);border-radius:var(--radius);padding:3px;margin-bottom:1rem;border:0.5px solid var(--border);}
+  .tab{flex:1;padding:7px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text-muted);font-family:var(--font);transition:all .12s;}
+  .tab:hover{color:var(--text);}
+  .tab.active{background:var(--bg-card);color:var(--text);border:0.5px solid var(--border);}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:1rem;}
+  .stat{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;}
+  .stat-val{font-size:22px;font-weight:600;color:var(--text);}
+  .stat-lbl{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+  /* Columns */
+  .cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:start;}
+  .col{background:var(--bg-col);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:11px;}
+  .col.live-col{border-color:var(--green-border);background:#f5fbee;}
+  .col-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border);}
+  .col-head-left{display:flex;flex-direction:column;gap:4px;}
+  .col-title-row{display:flex;align-items:center;gap:6px;}
+  .col-title{font-size:13px;font-weight:600;color:var(--text);}
+  .col-abbr{font-size:10px;color:var(--text-muted);background:var(--bg-card);border:0.5px solid var(--border);border-radius:20px;padding:1px 7px;}
+  .live-badge{font-size:9px;padding:2px 7px;border-radius:20px;background:var(--success-bg);color:var(--success-text);font-weight:600;display:inline-flex;align-items:center;gap:3px;}
+  .col-time{font-size:11px;color:var(--text-muted);}
+  .col-add-btn{background:transparent;border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text-muted);cursor:pointer;font-size:18px;padding:2px 5px;transition:all .12s;flex-shrink:0;}
+  .col-add-btn:hover{background:var(--bg-card);color:var(--text);}
+  .accts{display:flex;flex-direction:column;gap:6px;}
+  .empty-col{font-size:12px;color:var(--text-faint);text-align:center;padding:16px 0;}
+
+  /* Section divider inside column */
+  .col-divider{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);padding:6px 0 3px;border-top:0.5px solid var(--border);margin-top:4px;}
+  .col-divider:first-child{border-top:none;margin-top:0;padding-top:0;}
+  .col-divider.red{color:var(--red-text);}
+  .col-divider.amber{color:var(--yellow-text);}
+
+  /* Account card */
+  .acard{padding:9px 10px;border-radius:var(--radius);border:0.5px solid var(--border);background:var(--bg-card);cursor:pointer;transition:border-color .12s,background .12s;}
+  .acard:hover{border-color:var(--border-med);background:#fafaf8;}
+  .acard.cb-overdue{border-left:3px solid var(--red);padding-left:8px;}
+  .acard.cb-soon{border-left:3px solid var(--yellow);padding-left:8px;}
+  .acard-top{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+  .rdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .r-green{background:var(--green);} .r-yellow{background:var(--yellow);} .r-orange{background:var(--orange);} .r-red{background:var(--red);}
+  .aname{font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .log-quick-btn{background:transparent;border:0.5px solid var(--green-border);border-radius:var(--radius);color:var(--green-text);cursor:pointer;font-size:10px;font-weight:500;padding:3px 8px;font-family:var(--font);transition:background .1s;white-space:nowrap;flex-shrink:0;}
+  .log-quick-btn:hover{background:var(--green-bg);}
+  .acontact{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;}
+  .atags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
+  .atag{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+  .tag-mtg{background:var(--green-bg);color:var(--green-text);}
+  .tag-cb{background:var(--warn-bg);color:var(--warn-text);}
+  .tag-cb.overdue{background:var(--red-bg);color:var(--red-text);}
+  .tag-calls{background:var(--bg-col);color:var(--text-muted);border:0.5px solid var(--border);}
+
+  /* Modal overlay */
+  .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;}
+  .ov.open{display:flex;}
+  .modal{background:var(--bg-card);border:0.5px solid var(--border-med);border-radius:var(--radius-lg);width:100%;max-width:460px;padding:1.5rem;position:relative;margin:auto;}
+  .modal.sm{max-width:360px;}
+  .mhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.1rem;gap:12px;}
+  .mtitle{font-size:16px;font-weight:600;color:var(--text);}
+  .msub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+  .xbtn{background:transparent;border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text-muted);cursor:pointer;font-size:16px;line-height:1;padding:5px 7px;transition:all .12s;flex-shrink:0;}
+  .xbtn:hover{background:var(--bg-col);color:var(--text);}
+  .sec-lbl{font-size:10px;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin:14px 0 7px;}
+
+  /* Rating buttons */
+  .rating-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;}
+  .rbtn{padding:5px 14px;border-radius:20px;border:0.5px solid var(--border-med);background:transparent;cursor:pointer;font-size:12px;font-family:var(--font);transition:all .1s;}
+  .rbtn:hover{background:var(--bg-col);}
+  .rbtn.ag{background:var(--green-bg);color:var(--green-text);border-color:var(--green-border);}
+  .rbtn.ay{background:var(--yellow-bg);color:var(--yellow-text);border-color:var(--yellow-border);}
+  .rbtn.ao{background:var(--orange-bg);color:var(--orange-text);border-color:var(--orange-border);}
+  .rbtn.ar{background:var(--red-bg);color:var(--red-text);border-color:var(--red-border);}
+
+  /* Callback block */
+  .cb-block{padding:10px 12px;border-radius:var(--radius);border:0.5px solid var(--yellow-border);background:var(--yellow-bg);margin-bottom:10px;}
+  .cb-block-title{font-size:11px;font-weight:600;color:var(--yellow-text);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+
+  /* Forms */
+  .ql-form{display:flex;flex-direction:column;gap:9px;}
+  .ql-textarea{font-size:13px;border-radius:var(--radius);border:0.5px solid var(--border-med);padding:9px 11px;background:var(--bg-col);color:var(--text);width:100%;resize:vertical;min-height:72px;font-family:var(--font);transition:border-color .1s;}
+  .ql-textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,95,165,.1);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .flbl{font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:500;}
+  input[type=text],input[type=date],input[type=time],select,.ql-input{font-size:12px;border-radius:var(--radius);border:0.5px solid var(--border-med);padding:7px 10px;background:var(--bg-input);color:var(--text);width:100%;font-family:var(--font);transition:border-color .1s;}
+  input[type=text]:focus,input[type=date]:focus,input[type=time]:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,95,165,.1);}
+  .cb-inner{padding:9px;background:var(--bg-card);border-radius:var(--radius);border:0.5px solid var(--border);}
+  .cb-inner-lbl{font-size:11px;font-weight:500;color:var(--text-muted);margin-bottom:7px;display:flex;align-items:center;gap:4px;}
+  .mtg-row{display:flex;align-items:center;gap:8px;}
+  .mtg-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--blue);}
+  .mtg-row label{font-size:12px;color:var(--text-muted);cursor:pointer;}
+  .btn-row{display:flex;justify-content:flex-end;gap:8px;margin-top:4px;}
+  .ig{margin-bottom:10px;}
+  .ig label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:500;}
+  .ig input.mono{font-family:var(--font-mono);font-size:11px;}
+  .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem;}
+  .bcnl{padding:7px 15px;border-radius:var(--radius);border:0.5px solid var(--border-med);background:transparent;color:var(--text-muted);cursor:pointer;font-size:12px;font-family:var(--font);}
+  .bsav{padding:7px 18px;border-radius:var(--radius);border:0.5px solid var(--border-med);background:var(--bg-card);color:var(--text);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--font);transition:background .1s;}
+  .bsav:hover{background:var(--bg-col);}
+  .bsav.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+  .bsav.primary:hover{background:#333;}
+
+  /* Log items */
+  .log-item{border:0.5px solid var(--border);border-radius:var(--radius);padding:9px 11px;background:var(--bg-col);margin-bottom:6px;}
+  .log-r1{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .log-date{font-size:12px;font-weight:600;color:var(--text);}
+  .log-outcome{font-size:10px;color:var(--text-muted);background:var(--bg-card);border:0.5px solid var(--border);border-radius:20px;padding:1px 7px;}
+  .log-notes{font-size:12px;color:var(--text-muted);line-height:1.5;}
+  .log-mtg{font-size:11px;color:var(--green-text);font-weight:600;margin-top:4px;display:flex;align-items:center;gap:4px;}
+
+  @media(max-width:900px){.cols{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  @media(max-width:540px){.cols{grid-template-columns:1fr;}.stats{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div>
+      <h1>Dandy Dental Lab — BDR Tracker</h1>
+      <p id="clock-line">...</p>
+    </div>
+    <div class="topbar-right">
+      <span class="sync-st" id="sync-st"><i class="ti ti-cloud" style="font-size:14px;"></i><span id="sync-txt">Loading</span></span>
+      <button class="tbtn" onclick="saveToDrive()"><i class="ti ti-upload" style="font-size:14px;"></i> Save</button>
+      <button class="tbtn primary" onclick="openAdd(null)"><i class="ti ti-plus" style="font-size:14px;"></i> Add account</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-queue" onclick="switchTab('queue')"><i class="ti ti-list-check" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Today's queue</button>
+    <button class="tab" id="tab-pipe" onclick="switchTab('pipe')"><i class="ti ti-layout-columns" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Pipeline</button>
+  </div>
+
+  <div class="stats" id="stats-bar"></div>
+  <div class="cols" id="main-cols"></div>
+</div>
+
+<!-- Quick log modal -->
+<div class="ov" id="ql-ov">
+  <div class="modal sm">
+    <div class="mhead">
+      <div><div class="mtitle" id="ql-title">Log call</div><div class="msub" id="ql-sub"></div></div>
+      <button class="xbtn" onclick="closeQL()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="ql-form">
+      <div><label class="flbl">Notes</label><textarea class="ql-textarea" id="ql-notes" placeholder="What happened on the call..."></textarea></div>
+      <div class="grid2">
+        <div><label class="flbl">Outcome</label>
+          <select id="ql-outcome">
+            <option value="">— select —</option>
+            <option>Connected</option><option>Left VM</option><option>No answer</option>
+            <option>Meeting booked</option><option>Not interested</option><option>Gatekeeper</option>
+          </select>
+        </div>
+        <div><label class="flbl">Update rating</label>
+          <select id="ql-rating">
+            <option value="">Keep current</option>
+            <option value="green">Green</option><option value="yellow">Yellow</option>
+            <option value="orange">Orange</option><option value="red">Red</option>
+          </select>
+        </div>
+      </div>
+      <div class="cb-inner">
+        <div class="cb-inner-lbl"><i class="ti ti-bell" style="font-size:13px;"></i> Schedule callback</div>
+        <div class="grid2" style="margin-bottom:7px;">
+          <div><label class="flbl">Date</label><input type="date" id="ql-cb-date"></div>
+          <div><label class="flbl">Time</label><input type="time" id="ql-cb-time"></div>
+        </div>
+        <div><label class="flbl">Callback note</label><input type="text" id="ql-cb-note" placeholder="e.g. Ask for Dr. Kim directly"></div>
+      </div>
+      <div class="mtg-row"><input type="checkbox" id="ql-mtg"><label for="ql-mtg">Meeting booked from this call</label></div>
+      <div class="btn-row">
+        <button class="bsav" onclick="closeQL()">Cancel</button>
+        <button class="bsav primary" onclick="saveQL()">Save call</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="ov" id="det-ov">
+  <div class="modal">
+    <div class="mhead">
+      <div>
+        <div class="mtitle" id="det-name"></div>
+        <div class="msub" id="det-contact"></div>
+        <div style="font-size:10px;color:var(--text-faint);font-family:var(--font-mono);margin-top:3px;" id="det-sfid"></div>
+      </div>
+      <button class="xbtn" onclick="closeDet()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="sec-lbl">Rating</div>
+    <div class="rating-row">
+      <button class="rbtn" id="rb-green" onclick="setRating('green')">Green</button>
+      <button class="rbtn" id="rb-yellow" onclick="setRating('yellow')">Yellow</button>
+      <button class="rbtn" id="rb-orange" onclick="setRating('orange')">Orange</button>
+      <button class="rbtn" id="rb-red" onclick="setRating('red')">Red</button>
+    </div>
+    <div class="sec-lbl">Callback / follow-up</div>
+    <div class="cb-block">
+      <div class="cb-block-title"><i class="ti ti-bell" style="font-size:14px;"></i> Scheduled callback</div>
+      <div class="grid2" style="margin-bottom:7px;">
+        <div><label class="flbl">Date</label><input type="date" id="det-cb-date"></div>
+        <div><label class="flbl">Time</label><input type="time" id="det-cb-time"></div>
+      </div>
+      <div style="margin-bottom:8px;"><label class="flbl">Note</label><input type="text" id="det-cb-note" placeholder="What to discuss..."></div>
+      <div style="display:flex;gap:7px;">
+        <button class="bsav" onclick="clearCb()">Clear</button>
+        <button class="bsav primary" onclick="saveCb()">Set callback</button>
+      </div>
+    </div>
+    <div class="sec-lbl">Call history</div>
+    <div id="det-log-list"></div>
+    <div style="font-size:12px;color:var(--text-faint);" id="det-no-logs"></div>
+  </div>
+</div>
+
+<!-- Add account modal -->
+<div class="ov" id="add-ov">
+  <div class="modal sm">
+    <div class="mhead"><div class="mtitle">Add account</div><button class="xbtn" onclick="closeAdd()"><i class="ti ti-x"></i></button></div>
+    <div class="ig"><label>Account name</label><input type="text" id="na" placeholder="e.g. Bright Smiles Dental"></div>
+    <div class="ig"><label>Contact name</label><input type="text" id="nc" placeholder="e.g. Dr. Sarah Kim"></div>
+    <div class="ig"><label>Salesforce ID</label><input type="text" id="nsf" placeholder="0012v00003AbCdEFGH" class="mono"></div>
+    <div class="ig"><label>Time zone</label>
+      <select id="ntz"><option value="ET">Eastern (ET)</option><option value="CT">Central (CT)</option><option value="MT">Mountain (MT)</option><option value="PT">Pacific (PT)</option></select>
+    </div>
+    <div class="ig"><label>Rating</label>
+      <select id="nr"><option value="green">Green — high chance</option><option value="yellow">Yellow — moderate</option><option value="orange">Orange — low</option><option value="red">Red — unlikely</option></select>
+    </div>
+    <div class="mfoot"><button class="bcnl" onclick="closeAdd()">Cancel</button><button class="bsav primary" onclick="saveNewAcct()">Add account</button></div>
+  </div>
+</div>
+
+<script>
+const TZS=[{key:'ET',label:'Eastern',abbr:'ET',offset:-5},{key:'CT',label:'Central',abbr:'CT',offset:-6},{key:'MT',label:'Mountain',abbr:'MT',offset:-7},{key:'PT',label:'Pacific',abbr:'PT',offset:-8}];
+const RORDER={green:0,yellow:1,orange:2,red:3};
+const DRIVE_FILE='dandy_bdr_tracker_v4.json';
+let accounts=[],nextId=1,currentAcct=null,driveFileId=null,saving=false,currentTab='queue',qlAcctId=null;
+
+function tzNow(tz){const now=new Date();const utc=now.getTime()+now.getTimezoneOffset()*60000;return new Date(utc+tz.offset*3600000);}
+function isLive(tz){const h=tzNow(tz).getHours();return h>=9&&h<17;}
+function fmtDate(d){if(!d)return'';const[y,m,day]=d.split('-');const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${mo[parseInt(m)-1]} ${parseInt(day)}`;}
+function fmtTime(t){if(!t)return'';const[h,m]=t.split(':');const hr=parseInt(h);return`${hr>12?hr-12:hr||12}:${m}${hr>=12?'pm':'am'}`;}
+function isOverdue(a){if(!a.callback?.date)return false;return new Date(a.callback.date+'T'+(a.callback.time||'09:00'))<=new Date();}
+function isSoon(a){if(!a.callback?.date)return false;const diff=(new Date(a.callback.date+'T'+(a.callback.time||'09:00'))-new Date())/60000;return diff>0&&diff<60;}
+function setSyncStatus(msg,icon='ti-cloud'){document.getElementById('sync-txt').textContent=msg;document.querySelector('#sync-st i').className=`ti ${icon}`;}
+
+function updateClock(){
+  const et=tzNow(TZS[0]);
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const h=et.getHours(),m=et.getMinutes();
+  document.getElementById('clock-line').textContent=`${days[et.getDay()]} ${months[et.getMonth()]} ${et.getDate()} · ${h>12?h-12:h||12}:${String(m).padStart(2,'0')}${h>=12?'pm':'am'} ET`;
+}
+
+async function callAPI(body){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,...body,mcp_servers:[{type:'url',url:'https://drivemcp.googleapis.com/mcp/v1',name:'gdrive'}]})});
+  return r.json();
+}
+
+async function loadFromDrive(){
+  setSyncStatus('Connecting...','ti-loader');
+  try{
+    const data=await callAPI({messages:[{role:'user',content:`Search Google Drive for a file named exactly "${DRIVE_FILE}". If found return {"fileId":"...","content":"..."}, else {"fileId":null,"content":null}. Only JSON, no other text.`}]});
+    const txt=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    const parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    if(parsed.fileId&&parsed.content){
+      driveFileId=parsed.fileId;
+      const state=JSON.parse(parsed.content);
+      accounts=state.accounts||[];nextId=state.nextId||accounts.length+1;
+      accounts.forEach(a=>{if(!a.sfId)a.sfId='';if(!a.callback)a.callback={};if(a.rank==null)a.rank=999;if(!a.logs)a.logs=[];});
+      setSyncStatus('Loaded from Drive','ti-cloud-check');
+    } else {setSyncStatus('New — save to sync','ti-cloud-upload');}
+  } catch(e){setSyncStatus('Drive unavailable','ti-cloud-off');}
+  renderAll();
+}
+
+async function saveToDrive(){
+  if(saving)return;saving=true;setSyncStatus('Saving...','ti-loader');
+  const content=JSON.stringify({accounts,nextId});
+  try{
+    const prompt=driveFileId
+      ?`Update Drive file ID "${driveFileId}" with this content (overwrite): ${content}. Confirm {"ok":true}.`
+      :`Create Drive file "${DRIVE_FILE}" with content: ${content}. Return {"ok":true,"fileId":"..."}`;
+    const data=await callAPI({messages:[{role:'user',content:prompt}]});
+    const txt=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    const parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    if(!driveFileId&&parsed.fileId)driveFileId=parsed.fileId;
+    setSyncStatus('Saved to Drive','ti-cloud-check');
+  } catch(e){setSyncStatus('Save failed — retry','ti-cloud-off');}
+  saving=false;
+}
+
+function switchTab(t){
+  currentTab=t;
+  document.getElementById('tab-queue').className='tab'+(t==='queue'?' active':'');
+  document.getElementById('tab-pipe').className='tab'+(t==='pipe'?' active':'');
+  renderCols();
+}
+
+function renderAll(){updateClock();renderStats();renderCols();}
+
+function renderStats(){
+  const total=accounts.length;
+  const mtg=accounts.filter(a=>a.meetingBooked||a.logs.some(l=>l.meetingBooked)).length;
+  const due=accounts.filter(a=>isOverdue(a)).length;
+  const green=accounts.filter(a=>a.rating==='green').length;
+  document.getElementById('stats-bar').innerHTML=`
+    <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Total accounts</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green-text);">${green}</div><div class="stat-lbl">Green rated</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--red-text);">${due}</div><div class="stat-lbl">Callbacks due</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--blue);">${mtg}</div><div class="stat-lbl">Meetings booked</div></div>`;
+}
+
+function sortAccts(arr){
+  return [...arr].sort((a,b)=>{
+    const aDue=isOverdue(a)?0:1,bDue=isOverdue(b)?0:1;
+    if(aDue!==bDue)return aDue-bDue;
+    const aSoon=isSoon(a)?0:1,bSoon=isSoon(b)?0:1;
+    if(aSoon!==bSoon)return aSoon-bSoon;
+    if(RORDER[a.rating]!==RORDER[b.rating])return RORDER[a.rating]-RORDER[b.rating];
+    return(a.rank||999)-(b.rank||999);
+  });
+}
+
+function renderCols(){
+  const g=document.getElementById('main-cols');g.innerHTML='';
+  const isQueue=currentTab==='queue';
+  TZS.forEach(tz=>{
+    const live=isLive(tz);
+    const tzT=tzNow(tz);
+    const h=tzT.getHours(),m=tzT.getMinutes();
+    const timeStr=`${h>12?h-12:h||12}:${String(m).padStart(2,'0')}${h>=12?'pm':'am'}`;
+    const raw=accounts.filter(a=>a.tz===tz.key);
+    const sorted=sortAccts(raw);
+    const col=document.createElement('div');
+    col.className='col'+(live?' live-col':'');
+
+    const over=sorted.filter(a=>isOverdue(a));
+    const soon=sorted.filter(a=>!isOverdue(a)&&isSoon(a));
+    const normal=sorted.filter(a=>!isOverdue(a)&&!isSoon(a));
+
+    let cards='';
+    if(!raw.length){cards='<div class="empty-col">No accounts yet</div>';}
+    else if(isQueue){
+      if(over.length){cards+=`<div class="col-divider red"><i class="ti ti-bell" style="font-size:9px;vertical-align:-1px;"></i> Callbacks due</div>`;over.forEach(a=>{cards+=acctCard(a,true);});}
+      if(soon.length){cards+=`<div class="col-divider amber"><i class="ti ti-clock" style="font-size:9px;vertical-align:-1px;"></i> Due soon</div>`;soon.forEach(a=>{cards+=acctCard(a,true);});}
+      if(normal.length){if(over.length||soon.length)cards+=`<div class="col-divider">Queue</div>`;normal.forEach(a=>{cards+=acctCard(a,true);});}
+    } else {
+      sorted.forEach(a=>{cards+=acctCard(a,false);});
+    }
+
+    col.innerHTML=`<div class="col-head">
+      <div class="col-head-left">
+        <div class="col-title-row">
+          <span class="col-title">${tz.label}</span>
+          <span class="col-abbr">${tz.abbr}</span>
+          ${live?'<span class="live-badge"><i class="ti ti-circle-filled" style="font-size:8px;"></i>Live</span>':''}
+        </div>
+        <div class="col-time">${timeStr} local</div>
+      </div>
+      <button class="col-add-btn" onclick="openAdd('${tz.key}')" title="Add account"><i class="ti ti-plus" style="font-size:16px;"></i></button>
+    </div>
+    <div class="accts">${cards}</div>`;
+    g.appendChild(col);
+  });
+}
+
+function acctCard(a,showLog){
+  const over=isOverdue(a),soon=isSoon(a),cb=a.callback?.date;
+  const mtg=a.meetingBooked||a.logs.some(l=>l.meetingBooked);
+  let cls='acard';if(over)cls+=' cb-overdue';else if(soon)cls+=' cb-soon';
+  return`<div class="${cls}" onclick="openDet(${a.id})">
+    <div class="acard-top">
+      <div class="rdot r-${a.rating}"></div>
+      <div class="aname">${a.name}</div>
+      ${showLog?`<button class="log-quick-btn" onclick="event.stopPropagation();openQL(${a.id})"><i class="ti ti-phone-plus" style="font-size:11px;"></i> Log</button>`:''}
+    </div>
+    <div class="acontact">${a.contact||''}</div>
+    <div class="atags">
+      ${over?`<span class="atag tag-cb overdue"><i class="ti ti-bell" style="font-size:10px;"></i> Overdue: ${fmtDate(cb)}</span>`:''}
+      ${!over&&soon?`<span class="atag tag-cb"><i class="ti ti-bell" style="font-size:10px;"></i> Due soon</span>`:''}
+      ${!over&&!soon&&cb?`<span class="atag tag-cb"><i class="ti ti-bell" style="font-size:10px;"></i> ${fmtDate(cb)}${a.callback.time?' '+fmtTime(a.callback.time):''}</span>`:''}
+      ${mtg?'<span class="atag tag-mtg">Meeting</span>':''}
+      ${a.logs.length?`<span class="atag tag-calls">${a.logs.length} call${a.logs.length!==1?'s':''}</span>`:''}
+    </div>
+  </div>`;
+}
+
+function openQL(id){
+  qlAcctId=id;const a=accounts.find(x=>x.id===id);
+  document.getElementById('ql-title').textContent=a.name;
+  document.getElementById('ql-sub').textContent=a.contact||'';
+  ['ql-notes','ql-cb-note'].forEach(i=>document.getElementById(i).value='');
+  ['ql-outcome','ql-rating'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('ql-cb-date').value=a.callback?.date||'';
+  document.getElementById('ql-cb-time').value=a.callback?.time||'';
+  document.getElementById('ql-mtg').checked=false;
+  document.getElementById('ql-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('ql-notes').focus(),60);
+}
+function closeQL(){document.getElementById('ql-ov').classList.remove('open');}
+function saveQL(){
+  const a=accounts.find(x=>x.id===qlAcctId);
+  a.logs.unshift({date:new Date().toISOString().split('T')[0],time:new Date().toTimeString().slice(0,5),notes:document.getElementById('ql-notes').value,outcome:document.getElementById('ql-outcome').value,meetingBooked:document.getElementById('ql-mtg').checked});
+  if(document.getElementById('ql-mtg').checked)a.meetingBooked=true;
+  const nr=document.getElementById('ql-rating').value;if(nr)a.rating=nr;
+  const cbDate=document.getElementById('ql-cb-date').value;
+  if(cbDate)a.callback={date:cbDate,time:document.getElementById('ql-cb-time').value,note:document.getElementById('ql-cb-note').value};
+  closeQL();renderAll();
+}
+
+function openDet(id){
+  currentAcct=accounts.find(a=>a.id===id);
+  document.getElementById('det-name').textContent=currentAcct.name;
+  document.getElementById('det-contact').textContent=currentAcct.contact||'';
+  document.getElementById('det-sfid').textContent=currentAcct.sfId?`SF: ${currentAcct.sfId}`:'';
+  document.getElementById('det-cb-date').value=currentAcct.callback?.date||'';
+  document.getElementById('det-cb-time').value=currentAcct.callback?.time||'';
+  document.getElementById('det-cb-note').value=currentAcct.callback?.note||'';
+  renderRatingBtns();renderDetLogs();
+  document.getElementById('det-ov').classList.add('open');
+}
+function closeDet(){document.getElementById('det-ov').classList.remove('open');renderAll();}
+function renderRatingBtns(){['green','yellow','orange','red'].forEach(r=>{document.getElementById('rb-'+r).className='rbtn'+(currentAcct.rating===r?' a'+r[0]:'');});}
+function setRating(r){currentAcct.rating=r;renderRatingBtns();}
+function saveCb(){if(!currentAcct)return;currentAcct.callback={date:document.getElementById('det-cb-date').value,time:document.getElementById('det-cb-time').value,note:document.getElementById('det-cb-note').value};closeDet();}
+function clearCb(){if(!currentAcct)return;currentAcct.callback={};['det-cb-date','det-cb-time','det-cb-note'].forEach(i=>document.getElementById(i).value='');}
+function renderDetLogs(){
+  const el=document.getElementById('det-log-list'),no=document.getElementById('det-no-logs');
+  if(!currentAcct.logs.length){el.innerHTML='';no.textContent='No calls logged yet.';return;}
+  no.textContent='';
+  el.innerHTML=currentAcct.logs.map(l=>`<div class="log-item"><div class="log-r1"><span class="log-date">${fmtDate(l.date)} ${fmtTime(l.time)}</span>${l.outcome?`<span class="log-outcome">${l.outcome}</span>`:''}</div>${l.notes?`<div class="log-notes">${l.notes}</div>`:''}${l.meetingBooked?'<div class="log-mtg"><i class="ti ti-check" style="font-size:11px;"></i> Meeting booked</div>':''}</div>`).join('');
+}
+
+function openAdd(tz){if(tz)document.getElementById('ntz').value=tz;document.getElementById('add-ov').classList.add('open');}
+function closeAdd(){document.getElementById('add-ov').classList.remove('open');}
+function saveNewAcct(){
+  const name=document.getElementById('na').value.trim();if(!name)return;
+  accounts.push({id:nextId++,name,contact:document.getElementById('nc').value.trim(),sfId:document.getElementById('nsf').value.trim(),tz:document.getElementById('ntz').value,rating:document.getElementById('nr').value,rank:accounts.length+1,meetingBooked:false,callback:{},logs:[]});
+  ['na','nc','nsf'].forEach(i=>document.getElementById(i).value='');
+  closeAdd();renderAll();
+}
+
+['ql-ov','det-ov','add-ov'].forEach(id=>{
+  const fns={['ql-ov']:closeQL,['det-ov']:closeDet,['add-ov']:closeAdd};
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)fns[id]();});
+});
+
+setInterval(updateClock,30000);
+loadFromDrive();
+</script>
+</body>
+</html>
